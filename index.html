@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAHID x GHOUS | ELITE SYSTEM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Metal+Mania&display=swap');
+
+        body, html { margin: 0; padding: 0; overflow: hidden; background: #000; font-family: 'Orbitron', sans-serif; }
+
+        /* LIVE LIQUID PARTICLES BACKGROUND */
+        #live-bg { position: fixed; inset: 0; z-index: -2; background: #000; }
+
+        /* DARK VIGNETTE & SCANLINES */
+        .overlay-fx {
+            position: fixed; inset: 0;
+            background: radial-gradient(circle, transparent 20%, #000 100%),
+                        repeating-linear-gradient(0deg, rgba(255,0,0,0.05) 0px, transparent 1px);
+            z-index: -1; pointer-events: none;
+        }
+
+        /* ENTRY GATE */
+        #gate {
+            position: fixed; inset: 0; background: #000; z-index: 10000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .start-btn {
+            background: none; border: 3px solid #ff0000; color: #ff0000;
+            padding: 20px 60px; font-size: 25px; font-weight: 900;
+            cursor: pointer; box-shadow: 0 0 40px #ff0000; letter-spacing: 10px;
+            transition: 0.3s;
+        }
+        .start-btn:hover { background: #ff0000; color: #fff; }
+
+        /* MAIN STAGE */
+        #stage { display: none; height: 100vh; flex-direction: column; align-items: center; justify-content: center; }
+
+        /* THE PHOTOS (FULL HEAVY) */
+        .photo-deck {
+            display: flex; gap: 30px; 
+            animation: pulse-vibe 0.1s infinite alternate;
+        }
+        .pic-frame {
+            width: 260px; height: 360px; border: 6px solid #fff;
+            box-shadow: 0 0 50px #ff0000; transform: skew(-5deg);
+            overflow: hidden; background: #111;
+        }
+        .pic-frame img { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.3) brightness(0.9); }
+
+        @keyframes pulse-vibe {
+            from { transform: scale(1); filter: hue-rotate(0deg); }
+            to { transform: scale(1.02); filter: hue-rotate(10deg); }
+        }
+
+        /* SLEEK HEAVY NAME (CHOTA KIYA HAI) */
+        .names-sleek {
+            font-family: 'Metal Mania', cursive;
+            font-size: 8vw; color: #fff; margin: 20px 0;
+            text-transform: uppercase; letter-spacing: 15px;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000;
+            background: linear-gradient(to bottom, #fff, #ff0000);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        /* CONTROLS */
+        .pc-controls {
+            position: fixed; bottom: 30px; display: flex; gap: 30px;
+            background: rgba(255,0,0,0.1); padding: 15px 50px;
+            border: 1px solid #ff0000; backdrop-filter: blur(15px);
+        }
+        .btn { background: none; border: none; color: #fff; font-size: 18px; font-weight: 900; cursor: pointer; letter-spacing: 5px; }
+
+        /* NUCLEAR VISUALIZER */
+        canvas#vis { position: absolute; bottom: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.6; }
+    </style>
+</head>
+<body onclick="launch()">
+
+    <canvas id="live-bg"></canvas>
+    <canvas id="vis"></canvas>
+    <div class="overlay-fx"></div>
+
+    <div id="gate">
+        <h1 style="color: #fff; letter-spacing: 15px; margin-bottom: 30px;">WARRIOR MODE</h1>
+        <button class="start-btn">ENGAGE</button>
+    </div>
+
+    <div id="stage">
+        <div class="photo-deck">
+            <div class="pic-frame"><img src="wahid.jpg" alt="WAHID"></div>
+            <div class="pic-frame"><img src="ghouss.jpg" alt="GHOUS"></div>
+        </div>
+
+        <h1 class="names-sleek">WAHID X GHOUS</h1>
+
+        <div class="pc-controls">
+            <button class="btn" onclick="ctrl('play')">PLAY</button>
+            <button class="btn" style="color:#ff0000" onclick="ctrl('stop')">STOP</button>
+        </div>
+    </div>
+
+    <audio id="sultanMusic" loop src="sultan.mp3"></audio>
+
+    <script>
+        const bgC = document.getElementById('live-bg');
+        const visC = document.getElementById('vis');
+        const bctx = bgC.getContext('2d');
+        const vctx = visC.getContext('2d');
+        const audio = document.getElementById('sultanMusic');
+
+        bgC.width = visC.width = window.innerWidth;
+        bgC.height = visC.height = window.innerHeight;
+
+        // HYPER-LIVE BACKGROUND (MOVING ENERGY)
+        let particles = [];
+        for(let i=0; i<100; i++) {
+            particles.push({x: Math.random()*bgC.width, y: Math.random()*bgC.height, r: Math.random()*3, s: Math.random()*2});
+        }
+
+        function drawLiveBg() {
+            bctx.fillStyle = 'rgba(0,0,0,0.15)';
+            bctx.fillRect(0,0,bgC.width, bgC.height);
+            particles.forEach(p => {
+                bctx.fillStyle = '#ff0000';
+                bctx.beginPath();
+                bctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+                bctx.fill();
+                p.y -= p.s;
+                if(p.y < 0) p.y = bgC.height;
+            });
+            requestAnimationFrame(drawLiveBg);
+        }
+        drawLiveBg();
+
+        function launch() {
+            audio.play();
+            document.getElementById('gate').style.display = 'none';
+            document.getElementById('stage').style.display = 'flex';
+            drawVis();
+        }
+
+        function ctrl(t) { if(t==='play') audio.play(); else { audio.pause(); audio.currentTime=0; }}
+
+        function drawVis() {
+            vctx.clearRect(0,0,visC.width, visC.height);
+            let bars = 150;
+            for(let i=0; i<bars; i++) {
+                let h = Math.random() * visC.height;
+                vctx.fillStyle = (i%2==0) ? '#ff0000' : '#fff';
+                vctx.fillRect(i*(visC.width/bars), visC.height-h, 2, h);
+            }
+            requestAnimationFrame(drawVis);
+        }
+    </script>
+</body>
+</html>
